@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог книг</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .action-button {
+            display: inline-block;
+            padding: 5px 10px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .add-button {
+            background-color: green;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+        }
+        .edit-button {
+            background-color: darkblue;
+        }
+        .delete-button {
+            background-color: red;
+        }
+        h1 {
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f4f4f4;
+            padding: 10px;
+            margin: 10px auto;
+            width: 50%;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Каталог книг</h1>
+    <a href="{% url 'add_book' %}" class="action-button add-button">Добавить новую книгу</a>
+    <ul>
+        {% for book in page_obj %}
+            <li>
+                <strong>Название:</strong> {{ book.book_name }} <br>
+                <strong>Автор:</strong> {{ book.author|default:"Неизвестен" }} <br>
+                <strong>Цена:</strong> {{ book.book_price }}₽ <br>
+                <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a> |
+                <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
+            </li>
+        {% empty %}
+            <li>Книг пока нет</li>
+        {% endfor %}
+    </ul>
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1">Первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+        {% endif %}
+
+        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+        {% endif %}
+    </div>
+</body>
+</html>
