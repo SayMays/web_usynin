@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Добавить/Редактировать книгу</title>
+    <title>Вход</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,7 +45,7 @@
             font-weight: bold;
         }
         input[type="text"],
-        input[type="number"] {
+        input[type="password"] {
             width: 100%;
             padding: 2px;
             margin: 5px 0;
@@ -54,11 +54,18 @@
             font-size: 16px;
         }
         input[type="text"]:focus,
-        input[type="number"]:focus {
+        input[type="password"]:focus {
             outline: none;
-            border-color: darkblue; /* Цвет обводки при фокусе */
+            border-color: darkblue;
         }
         .errorlist {
+            color: red;
+            font-size: 0.9em;
+            margin: 5px 0;
+            padding: 0;
+            list-style-type: none;
+        }
+        .non-field-errors {
             color: red;
             font-size: 0.9em;
             margin: 5px 0;
@@ -68,12 +75,42 @@
     </style>
 </head>
 <body>
-    <h1>{% if form.instance.pk %}Редактировать книгу{% else %}Добавить книгу{% endif %}</h1>
+    <h1>Вход</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
+        {% if form.non_field_errors %}
+            <ul class="non-field-errors">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p>
+            <label for="{{ form.username.id_for_label }}">Логин:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+        <p>
+            <label for="{{ form.password.id_for_label }}">Пароль:</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+        <button type="submit">Войти</button>
     </form>
+    <a href="{% url 'register' %}">Нет аккаунта? Зарегистрироваться</a>
+    <br>
     <a href="{% url 'book_list' %}">Назад к списку</a>
 </body>
 </html>

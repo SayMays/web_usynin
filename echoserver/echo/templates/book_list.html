@@ -28,6 +28,33 @@
         .delete-button {
             background-color: red;
         }
+        .auth-button {
+            margin: 5px;
+            padding: 5px 10px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .login-button {
+            background-color: darkblue;
+        }
+        .login-button:hover {
+            background-color: navy;
+        }
+        .register-button {
+            background-color: forestgreen;
+        }
+        .register-button:hover {
+            background-color: darkgreen;
+        }
+        .logout-button {
+            background-color: red;
+            padding: 10px;
+        }
+        .logout-button:hover {
+            background-color: darkred;
+        }
         h1 {
             text-align: center;
         }
@@ -48,15 +75,35 @@
 </head>
 <body>
     <h1>Каталог книг</h1>
-    <a href="{% url 'add_book' %}" class="action-button add-button">Добавить новую книгу</a>
+
+    <div>
+        {% if is_authenticated %}
+            <a href="{% url 'logout' %}" class="action-button auth-button logout-button">Выйти</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="action-button auth-button login-button">Войти</a>
+            <a href="{% url 'register' %}" class="action-button auth-button register-button">Регистрация</a>
+        {% endif %}
+        {% if is_authenticated %}
+            <a href="{% url 'add_book' %}" class="action-button add-button">Добавить новую книгу</a>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
     <ul>
         {% for book in page_obj %}
             <li>
                 <strong>Название:</strong> {{ book.book_name }} <br>
                 <strong>Автор:</strong> {{ book.author|default:"Неизвестен" }} <br>
                 <strong>Цена:</strong> {{ book.book_price }}₽ <br>
-                <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a> |
-                <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
+                {% if is_admin %}
+                    <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a> |
+                    <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
+                {% endif %}
             </li>
         {% empty %}
             <li>Книг пока нет</li>
@@ -68,9 +115,7 @@
             <a href="?page=1">Первая</a>
             <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
         {% endif %}
-
         <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
-
         {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
             <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
