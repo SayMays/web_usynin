@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from .models import AuthUser, Book, Cart, CartItem, Orders, OrderItem, AuthGroup, AuthUserGroups
 from .forms import BookForm, CustomUserCreationForm, CustomAuthenticationForm
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import Group
