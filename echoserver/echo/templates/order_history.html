@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>История заказов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .order-list {
+            list-style-type: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .order-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .order-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+        }
+        .nav-links {
+            margin: 30px 0;
+        }
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #0069d9;
+        }
+        .empty-orders {
+            font-size: 1.2em;
+            color: #6c757d;
+            margin: 50px 0;
+        }
+        .messages {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>История заказов</h1>
+
+    <div class="nav-links">
+        <a href="{% url 'book_list' %}">Каталог книг</a>
+        <a href="{% url 'view_cart' %}">Корзина</a>
+        <a href="{% url 'profile' %}">Профиль</a>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if orders %}
+        <ul class="order-list">
+            {% for order in orders %}
+                <li class="order-item">
+                    <div class="order-header">
+                        <span>Заказ #{{ order.order_id }}</span>
+                        <span>{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                        <span>{{ order.total_price }}₽</span>
+                        <span>Статус: {{ order.status }}</span>
+                    </div>
+                    <div class="order-details">
+                        <a href="{% url 'order_detail' order.order_id %}" class="btn-details">Подробнее о заказе</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-orders">У вас пока нет заказов</p>
+    {% endif %}
+
+    <a href="{% url 'book_list' %}" class="back-link">Вернуться в каталог</a>
+</body>
+</html>

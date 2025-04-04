@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.conf import settings
 
 
 class AuthGroup(models.Model):
@@ -88,6 +89,27 @@ class Book(models.Model):
         db_table = 'book'
 
 
+class Cart(models.Model):
+    cart_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    created_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'cart'
+
+
+class CartItem(models.Model):
+    cart_item_id = models.AutoField(primary_key=True)
+    cart = models.ForeignKey(Cart, models.DO_NOTHING)
+    book = models.ForeignKey(Book, models.DO_NOTHING)
+    quantity = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'cart_item'
+
+
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
@@ -131,3 +153,27 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
+
+
+class OrderItem(models.Model):
+    order_item_id = models.AutoField(primary_key=True)
+    order = models.ForeignKey('Orders', models.DO_NOTHING)
+    book = models.ForeignKey(Book, models.DO_NOTHING)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'order_item'
+
+
+class Orders(models.Model):
+    order_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    created_at = models.DateTimeField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20)
+
+    class Meta:
+        managed = False
+        db_table = 'orders'
