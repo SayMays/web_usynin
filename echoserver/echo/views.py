@@ -309,7 +309,7 @@ def change_password(request):
 def clear_cart(request):
     try:
         cart = Cart.objects.get(user_id=request.user.id)
-        cart.cartitem_set.all().delete()  # Удаляем все элементы корзины
+        cart.cartitem_set.all().delete()
         messages.success(request, 'Корзина полностью очищена')
     except Cart.DoesNotExist:
         messages.error(request, 'Корзина уже пуста')
