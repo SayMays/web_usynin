@@ -313,3 +313,15 @@ def change_password(request):
         'form': form,
         'is_admin': is_admin(request.user)
     })
+
+
+@login_required
+def clear_cart(request):
+    try:
+        cart = Cart.objects.get(user_id=request.user.id)
+        cart.cartitem_set.all().delete()  # Удаляем все элементы корзины
+        messages.success(request, 'Корзина полностью очищена')
+    except Cart.DoesNotExist:
+        messages.error(request, 'Корзина уже пуста')
+
+    return redirect('view_cart')

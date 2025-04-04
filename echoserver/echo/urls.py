@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import book_list, add_book, edit_book, delete_book, register, user_login, user_logout, profile, add_to_cart, \
-    view_cart, remove_from_cart, order_history, order_detail, checkout, change_password
+    view_cart, remove_from_cart, order_history, order_detail, checkout, change_password, clear_cart
 
 urlpatterns = [
     path('', book_list, name='book_list'),
@@ -17,5 +17,6 @@ urlpatterns = [
     path('checkout/', checkout, name='checkout'),
     path('orders/', order_history, name='order_history'),
     path('orders/<int:order_id>/', order_detail, name='order_detail'),
-    path('profile/change-password/', change_password, name='change_password')
+    path('profile/change-password/', change_password, name='change_password'),
+    path('cart/clear/', clear_cart, name='clear_cart')
 ]
