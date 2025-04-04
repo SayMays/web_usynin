@@ -9,6 +9,7 @@ from django.db import models
 from django.conf import settings
 
 
+
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 

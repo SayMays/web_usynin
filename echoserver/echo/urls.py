@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import book_list, add_book, edit_book, delete_book, register, user_login, user_logout, profile, add_to_cart, \
-    view_cart, remove_from_cart, order_history, checkout, order_detail, change_password
+    view_cart, remove_from_cart, order_history, order_detail, checkout, change_password
 
 urlpatterns = [
     path('', book_list, name='book_list'),

@@ -93,6 +93,7 @@
                     <a href="{% url 'remove_from_cart' item_data.item.cart_item_id %}" class="action-button remove-button">
     {% if item_data.item.quantity > 1 %}Удалить (выбрать количество){% else %}Удалить{% endif %}
 </a>
+
                 </li>
             {% endfor %}
         </ul>
