@@ -102,16 +102,6 @@ def user_logout(request):
     messages.success(request, 'Вы вышли из системы')
     return redirect('book_list')
 
-def is_admin(user):
-    if not user.is_authenticated:
-        return False
-    try:
-        admin_group = AuthGroup.objects.get(name='admin')
-        return AuthUserGroups.objects.filter(user_id=user.id, group=admin_group).exists()
-    except AuthGroup.DoesNotExist:
-        return False
-
-
 def book_list(request):
     books = Book.objects.all().order_by('book_name')
     paginator = Paginator(books, 5)
