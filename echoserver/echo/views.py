@@ -27,18 +27,6 @@ def book_list(request):
     })
 
 
-def book_list(request):
-    books = Book.objects.all().order_by('book_name')
-    paginator = Paginator(books, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'book_list.html', {
-        'page_obj': page_obj,
-        'is_admin': request.user.is_authenticated and is_admin(request.user),
-        'is_authenticated': request.user.is_authenticated
-    })
-
-
 @login_required
 def add_book(request):
     if not request.user.groups.filter(name__in=['user', 'admin']).exists():
