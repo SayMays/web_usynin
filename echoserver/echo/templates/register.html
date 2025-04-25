@@ -101,14 +101,12 @@
         passwordRequirements.innerHTML = 'Ваш пароль должен обязательно содержать:<br>- не менее 6 символов;<br>- 1 цифру от 0 до 10;<br>- 1 заглавную букву;<br>- 1 специальный символ;';
         passwordInput.parentNode.appendChild(passwordRequirements);
 
-        // Проверка логина
         usernameInput.addEventListener('input', () => {
             if (usernameInput.value.length < 3) {
                 usernameError.textContent = 'Логин слишком короткий (минимум 3 символа)';
             } else {
                 usernameError.textContent = '';
 
-                // AJAX: проверка логина
                 fetch(`/check_username/?username=${encodeURIComponent(usernameInput.value)}`)
                     .then(response => response.json())
                     .then(data => {
@@ -119,7 +117,6 @@
             }
         });
 
-        // Проверка email
         emailInput.addEventListener('input', () => {
             const email = emailInput.value;
             const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -131,7 +128,6 @@
             } else {
                 emailError.textContent = '';
 
-                // AJAX: проверка email
                 fetch(`/check_email/?email=${encodeURIComponent(email)}`)
                     .then(response => response.json())
                     .then(data => {
@@ -142,7 +138,6 @@
             }
         });
 
-        // Проверка пароля
         passwordInput.addEventListener('input', () => {
             const password = passwordInput.value;
             let errors = [];
@@ -166,7 +161,6 @@
                 passwordError.textContent = '';
             }
 
-            // Проверка совпадения паролей
             if (password2Input.value && password !== password2Input.value) {
                 password2Input.nextElementSibling.textContent = 'Пароли не совпадают';
             } else {
@@ -174,7 +168,6 @@
             }
         });
 
-        // Проверка подтверждения пароля
         password2Input.addEventListener('input', () => {
             if (passwordInput.value !== password2Input.value) {
                 password2Input.nextElementSibling.textContent = 'Пароли не совпадают';
