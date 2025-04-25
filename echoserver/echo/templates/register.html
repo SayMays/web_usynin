@@ -21,7 +21,7 @@
             text-align: left;
         }
         button {
-            background-color: forestgreen; /* Зеленый цвет для кнопки "Зарегистрироваться" */
+            background-color: forestgreen;
             color: white;
             padding: 10px 15px;
             border: none;
@@ -41,11 +41,9 @@
         a:hover {
             text-decoration: underline;
         }
-        /* Стили для меток */
         label {
             font-weight: bold;
         }
-        /* Стили для полей ввода */
         input[type="text"],
         input[type="password"],
         input[type="email"] {
@@ -62,7 +60,6 @@
             outline: none;
             border-color: forestgreen;
         }
-        /* Стили для ошибок */
         .errorlist {
             color: red;
             font-size: 0.9em;
@@ -70,8 +67,123 @@
             padding: 0;
             list-style-type: none;
         }
+        .requirements {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const emailInput = document.querySelector('input[name="email"]');
+        const passwordInput = document.querySelector('input[name="password1"]');
+        const usernameInput = document.querySelector('input[name="username"]');
+        const password2Input = document.querySelector('input[name="password2"]');
+
+        const emailError = document.createElement('div');
+        emailError.style.color = 'red';
+        emailError.className = 'error-message';
+        emailInput.parentNode.appendChild(emailError);
+
+        const passwordError = document.createElement('div');
+        passwordError.style.color = 'red';
+        passwordError.className = 'error-message';
+        passwordInput.parentNode.appendChild(passwordError);
+
+        const usernameError = document.createElement('div');
+        usernameError.style.color = 'red';
+        usernameError.className = 'error-message';
+        usernameInput.parentNode.appendChild(usernameError);
+
+        const passwordRequirements = document.createElement('div');
+        passwordRequirements.className = 'requirements';
+        passwordRequirements.innerHTML = 'Ваш пароль должен обязательно содержать:<br>- не менее 6 символов;<br>- 1 цифру от 0 до 10;<br>- 1 заглавную букву;<br>- 1 специальный символ;';
+        passwordInput.parentNode.appendChild(passwordRequirements);
+
+        // Проверка логина
+        usernameInput.addEventListener('input', () => {
+            if (usernameInput.value.length < 3) {
+                usernameError.textContent = 'Логин слишком короткий (минимум 3 символа)';
+            } else {
+                usernameError.textContent = '';
+
+                // AJAX: проверка логина
+                fetch(`/check_username/?username=${encodeURIComponent(usernameInput.value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            usernameError.textContent = 'Логин уже занят';
+                        }
+                    });
+            }
+        });
+
+        // Проверка email
+        emailInput.addEventListener('input', () => {
+            const email = emailInput.value;
+            const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (email.length < 3) {
+                emailError.textContent = 'Email слишком короткий';
+            } else if (!pattern.test(email)) {
+                emailError.textContent = 'Некорректный email';
+            } else {
+                emailError.textContent = '';
+
+                // AJAX: проверка email
+                fetch(`/check_email/?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            emailError.textContent = 'Email уже используется';
+                        }
+                    });
+            }
+        });
+
+        // Проверка пароля
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            let errors = [];
+
+            if (password.length < 6) {
+                errors.push('минимум 6 символов');
+            }
+            if (!/\d/.test(password)) {
+                errors.push('1 цифра');
+            }
+            if (!/[A-ZА-Я]/.test(password)) {
+                errors.push('1 заглавная буква');
+            }
+            if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+                errors.push('1 специальный символ');
+            }
+
+            if (errors.length > 0) {
+                passwordError.textContent = 'Требуется: ' + errors.join(', ');
+            } else {
+                passwordError.textContent = '';
+            }
+
+            // Проверка совпадения паролей
+            if (password2Input.value && password !== password2Input.value) {
+                password2Input.nextElementSibling.textContent = 'Пароли не совпадают';
+            } else {
+                password2Input.nextElementSibling.textContent = '';
+            }
+        });
+
+        // Проверка подтверждения пароля
+        password2Input.addEventListener('input', () => {
+            if (passwordInput.value !== password2Input.value) {
+                password2Input.nextElementSibling.textContent = 'Пароли не совпадают';
+            } else {
+                password2Input.nextElementSibling.textContent = '';
+            }
+        });
+    });
+</script>
 <body>
     <h1>Регистрация</h1>
     <form method="post">

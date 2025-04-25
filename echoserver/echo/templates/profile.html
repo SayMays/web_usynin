@@ -99,6 +99,20 @@
         .error {
             color: #dc3545;
         }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .checking {
+            color: #17a2b8;
+        }
+        .available {
+            color: #28a745;
+        }
+        .unavailable {
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -113,12 +127,13 @@
     {% endif %}
 
     <div class="profile-form">
-        <form method="post">
+        <form method="post" id="profile-form">
             {% csrf_token %}
 
             <div class="form-group">
                 <label for="username">Логин:</label>
                 <input type="text" id="username" name="username" value="{{ user.username }}">
+                <div id="username-status" class="error-message"></div>
             </div>
 
             <div class="form-group">
@@ -129,6 +144,7 @@
             <div class="form-group">
                 <label for="email">Электронная почта:</label>
                 <input type="email" id="email" name="email" value="{{ user.email }}">
+                <div id="email-status" class="error-message"></div>
             </div>
 
             <div class="security-group">
@@ -136,15 +152,136 @@
                 <a href="{% url 'change_password' %}" class="btn-change-password">Сменить пароль</a>
             </div>
 
-            <button type="submit" class="btn-save">Сохранить изменения</button>
+            <button type="submit" class="btn-save" id="submit-btn">Сохранить изменения</button>
         </form>
     </div>
-
 
     <div class="nav-links">
         <a href="{% url 'book_list' %}">На главную</a>
         <a href="{% url 'order_history' %}">Мои заказы</a>
         <a href="{% url 'view_cart' %}">Корзина</a>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const submitBtn = document.getElementById('submit-btn');
+            const usernameStatus = document.getElementById('username-status');
+            const emailStatus = document.getElementById('email-status');
+            const originalUsername = "{{ user.username }}";
+            const originalEmail = "{{ user.email }}";
+
+            let usernameValid = true;
+            let emailValid = true;
+
+            usernameInput.addEventListener('input', function() {
+                const username = usernameInput.value.trim();
+
+                if (username.length < 3) {
+                    usernameStatus.textContent = 'Логин должен содержать минимум 3 символа';
+                    usernameStatus.className = 'error-message unavailable';
+                    usernameValid = false;
+                    updateSubmitButton();
+                    return;
+                }
+
+                if (username === originalUsername) {
+                    usernameStatus.textContent = '';
+                    usernameStatus.className = '';
+                    usernameValid = true;
+                    updateSubmitButton();
+                    return;
+                }
+
+                usernameStatus.textContent = 'Проверяем доступность...';
+                usernameStatus.className = 'error-message checking';
+
+                fetch(`/check_username/?username=${encodeURIComponent(username)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            usernameStatus.textContent = 'Логин уже занят';
+                            usernameStatus.className = 'error-message unavailable';
+                            usernameValid = false;
+                        } else {
+                            usernameStatus.textContent = 'Логин доступен';
+                            usernameStatus.className = 'error-message available';
+                            usernameValid = true;
+                        }
+                        updateSubmitButton();
+                    });
+            });
+
+            emailInput.addEventListener('input', function() {
+                const email = emailInput.value.trim();
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (email.length < 3) {
+                    emailStatus.textContent = 'Email слишком короткий';
+                    emailStatus.className = 'error-message unavailable';
+                    emailValid = false;
+                    updateSubmitButton();
+                    return;
+                }
+
+                if (!emailPattern.test(email)) {
+                    emailStatus.textContent = 'Некорректный формат email';
+                    emailStatus.className = 'error-message unavailable';
+                    emailValid = false;
+                    updateSubmitButton();
+                    return;
+                }
+
+                if (email === originalEmail) {
+                    emailStatus.textContent = '';
+                    emailStatus.className = '';
+                    emailValid = true;
+                    updateSubmitButton();
+                    return;
+                }
+
+                emailStatus.textContent = 'Проверяем доступность...';
+                emailStatus.className = 'error-message checking';
+
+                fetch(`/check_email/?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            emailStatus.textContent = 'Email уже используется';
+                            emailStatus.className = 'error-message unavailable';
+                            emailValid = false;
+                        } else {
+                            emailStatus.textContent = 'Email доступен';
+                            emailStatus.className = 'error-message available';
+                            emailValid = true;
+                        }
+                        updateSubmitButton();
+                    });
+            });
+
+            function updateSubmitButton() {
+                submitBtn.disabled = !(usernameValid && emailValid);
+            }
+
+            document.getElementById('profile-form').addEventListener('submit', function(e) {
+                if (!usernameValid || !emailValid) {
+                    e.preventDefault();
+
+                    if (!usernameValid) {
+                        usernameStatus.textContent = 'Пожалуйста, исправьте ошибки в логине';
+                        usernameStatus.className = 'error-message unavailable';
+                    }
+
+                    if (!emailValid) {
+                        emailStatus.textContent = 'Пожалуйста, исправьте ошибки в email';
+                        emailStatus.className = 'error-message unavailable';
+                    }
+                }
+            });
+
+            updateSubmitButton();
+        });
+    </script>
 </body>
 </html>

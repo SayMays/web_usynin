@@ -7,6 +7,9 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
         }
         .top-right-buttons {
             position: absolute;
@@ -37,7 +40,7 @@
         }
         .auth-button {
             margin: 5px;
-            padding: 5px 10px;
+            padding: 10px 15px;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -76,6 +79,20 @@
         }
         .cart-button:hover {
             background-color: #e0a800;
+        }
+        .filter-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .filter-button:hover {
+            background-color: #0056b3;
         }
         h1 {
             text-align: center;
@@ -129,6 +146,110 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        /* Стили для модального окна фильтров */
+        .filter-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .filter-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+        .filter-modal-content h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .filter-modal-content label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .filter-modal-content input[type="text"],
+        .filter-modal-content input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .filter-modal-content .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .filter-modal-content button {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .filter-modal-content .apply-button {
+            background-color: forestgreen;
+        }
+        .filter-modal-content .apply-button:hover {
+            background-color: darkgreen;
+        }
+        .filter-modal-content .cancel-button {
+            background-color: #6c757d;
+        }
+        .filter-modal-content .cancel-button:hover {
+            background-color: #5a6268;
+        }
+        .applied-filters {
+            margin: 20px auto;
+            width: 50%;
+            text-align: left;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .applied-filters ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .applied-filters ul li {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+            width: 100%;
+            box-shadow: none;
+        }
+        .applied-filters .reset-button {
+            background-color: red;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .applied-filters .reset-button:hover {
+            background-color: darkred;
+        }
     </style>
 </head>
 <body>
@@ -148,10 +269,38 @@
             <a href="{% url 'login' %}" class="action-button auth-button login-button">Войти</a>
             <a href="{% url 'register' %}" class="action-button auth-button register-button">Регистрация</a>
         {% endif %}
-
         {% if is_authenticated %}
             <a href="{% url 'add_book' %}" class="action-button add-button">Добавить новую книгу</a>
         {% endif %}
+        <a href="#" class="action-button filter-button" onclick="openFilterModal()">Фильтр</a>
+    </div>
+
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-modal-content">
+            <h2>Фильтры</h2>
+            <form method="get" action="{% url 'book_list' %}" id="filterForm">
+                <div>
+                    <label for="book_name">Название:</label>
+                    <input type="text" id="book_name" name="book_name" value="{{ request.GET.book_name|default:'' }}">
+                </div>
+                <div>
+                    <label for="author">Автор:</label>
+                    <input type="text" id="author" name="author" value="{{ request.GET.author|default:'' }}">
+                </div>
+                <div>
+                    <label for="price_min">Цена от:</label>
+                    <input type="number" id="price_min" name="price_min" value="{{ request.GET.price_min|default:'' }}" min="0" step="0.01">
+                </div>
+                <div>
+                    <label for="price_max">Цена до:</label>
+                    <input type="number" id="price_max" name="price_max" value="{{ request.GET.price_max|default:'' }}" min="0" step="0.01">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="apply-button">Применить</button>
+                    <button type="button" class="cancel-button" onclick="closeFilterModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     {% if messages %}
@@ -162,41 +311,100 @@
         {% endfor %}
     {% endif %}
 
+    {% if request.GET.book_name or request.GET.author or request.GET.price_min or request.GET.price_max %}
+        <div class="applied-filters">
+            <p><strong>Примененные фильтры:</strong></p>
+            <ul>
+                {% if request.GET.book_name and request.GET.book_name|length > 0 %}
+                    <li><strong>Название:</strong> {{ request.GET.book_name }}</li>
+                {% endif %}
+                {% if request.GET.author and request.GET.author|length > 0 %}
+                    <li><strong>Автор:</strong> {{ request.GET.author }}</li>
+                {% endif %}
+                {% if request.GET.price_min and request.GET.price_min|length > 0 %}
+                    <li><strong>Цена от:</strong> {{ request.GET.price_min }}₽</li>
+                {% endif %}
+                {% if request.GET.price_max and request.GET.price_max|length > 0 %}
+                    <li><strong>Цена до:</strong> {{ request.GET.price_max }}₽</li>
+                {% endif %}
+            </ul>
+            <button class="reset-button" onclick="window.location.href='{% url 'book_list' %}'">Сбросить фильтры</button>
+        </div>
+    {% endif %}
+
     <ul>
         {% for book in page_obj %}
             <li>
                 <strong>Название:</strong> {{ book.book_name }} <br>
                 <strong>Автор:</strong> {{ book.author|default:"Неизвестен" }} <br>
                 <strong>Цена:</strong> {{ book.book_price }}₽ <br>
-
                 {% if is_authenticated %}
                     <a href="{% url 'add_to_cart' book.book_id %}" class="action-button" style="background-color: forestgreen;">Положить в корзину</a>
                 {% endif %}
-
                 {% if is_admin %}
                     <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a>
                     <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
                 {% endif %}
             </li>
         {% empty %}
-            <li>Книг пока нет</li>
+            <li>Книг, соответствующих критериям, не найдено</li>
         {% endfor %}
     </ul>
 
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?page=1">Первая</a>
-            <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+            <a href="?page=1{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Назад</a>
         {% endif %}
-
         <span class="current-page">
             Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
         </span>
-
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Вперёд</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Последняя</a>
         {% endif %}
     </div>
+
+    <script>
+        function openFilterModal() {
+            console.log('Opening filter modal');
+            document.getElementById('filterModal').style.display = 'flex';
+        }
+
+        function closeFilterModal() {
+            console.log('Closing filter modal');
+            const modal = document.getElementById('filterModal');
+            if (modal) {
+                modal.style.display = 'none';
+            } else {
+                console.error('Filter modal element not found');
+            }
+        }
+
+        document.querySelector('#filterForm').addEventListener('submit', function(event) {
+            const priceMin = document.getElementById('price_min').value;
+            const priceMax = document.getElementById('price_max').value;
+
+            if (priceMin && priceMin < 0) {
+                alert('Минимальная цена не может быть отрицательной');
+                event.preventDefault();
+            }
+            if (priceMax && priceMax < 0) {
+                alert('Максимальная цена не может быть отрицательной');
+                event.preventDefault();
+            }
+            if (priceMin && priceMax && parseFloat(priceMin) > parseFloat(priceMax)) {
+                alert('Минимальная цена не может быть больше максимальной');
+                event.preventDefault();
+            }
+        });
+
+        document.getElementById('filterModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                console.log('Clicked outside modal, closing');
+                closeFilterModal();
+            }
+        });
+    </script>
 </body>
 </html>

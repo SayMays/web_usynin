@@ -1,4 +1,5 @@
 from django.contrib.auth.forms import PasswordChangeForm
+from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
@@ -16,15 +17,44 @@ def is_admin(user):
 
 
 def book_list(request):
-    books = Book.objects.all().order_by('book_name')
+    books = Book.objects.all()
+
+    book_name = request.GET.get('book_name', '')
+    author = request.GET.get('author', '')
+    price_min = request.GET.get('price_min', '')
+    price_max = request.GET.get('price_max', '')
+
+    if book_name:
+        books = books.filter(book_name__icontains=book_name)
+    if author:
+        books = books.filter(author__icontains=author)
+    if price_min:
+        try:
+            books = books.filter(book_price__gte=float(price_min))
+        except ValueError:
+            pass
+    if price_max:
+        try:
+            books = books.filter(book_price__lte=float(price_max))
+        except ValueError:
+            pass
+
+    books = books.order_by('book_name')
+
     paginator = Paginator(books, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     return render(request, 'book_list.html', {
         'page_obj': page_obj,
         'is_admin': is_admin(request.user),
-        'is_authenticated': request.user.is_authenticated
+        'is_authenticated': request.user.is_authenticated,
+        'book_name': book_name,
+        'author': author,
+        'price_min': price_min,
+        'price_max': price_max,
     })
+
 
 
 @login_required
@@ -303,3 +333,13 @@ def clear_cart(request):
         messages.error(request, 'Корзина уже пуста')
 
     return redirect('view_cart')
+
+def check_email(request):
+    email = request.GET.get('email', '')
+    exists = AuthUser.objects.filter(email=email).exists()
+    return JsonResponse({'exists': exists})
+
+def check_username(request):
+    username = request.GET.get('username', '')
+    exists = AuthUser.objects.filter(username=username).exists()
+    return JsonResponse({'exists': exists})
