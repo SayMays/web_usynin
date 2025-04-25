@@ -119,7 +119,7 @@
 
         emailInput.addEventListener('input', () => {
             const email = emailInput.value;
-            const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const pattern = /^[a-zA-Z0-9][a-zA-Z0-9.%]*(?:\.[a-zA-Z0-9.%]+)*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9]*(?:\.[a-zA-Z0-9]+)*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
 
             if (email.length < 3) {
                 emailError.textContent = 'Email слишком короткий';
@@ -148,7 +148,7 @@
             if (!/\d/.test(password)) {
                 errors.push('1 цифра');
             }
-            if (!/[A-ZА-Я]/.test(password)) {
+            if (!/[A-Z]/.test(password)) {
                 errors.push('1 заглавная буква');
             }
             if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {

@@ -215,7 +215,7 @@
 
             emailInput.addEventListener('input', function() {
                 const email = emailInput.value.trim();
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailPattern = /^[a-zA-Z0-9][a-zA-Z0-9.%]*(?:\.[a-zA-Z0-9.%]+)*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9]*(?:\.[a-zA-Z0-9]+)*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
 
                 if (email.length < 3) {
                     emailStatus.textContent = 'Email слишком короткий';
