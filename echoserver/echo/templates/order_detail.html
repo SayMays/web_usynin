@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <title>Детали заказа #{{ order.order_id }}</title>
     <style>
+        .site-title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            margin: 0;
+            padding: 0;
+        }
+        .site-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+            text-decoration: none;
+        }
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -13,6 +27,7 @@
         h1 {
             text-align: center;
             color: #343a40;
+            margin-top: 60px;
         }
         .order-container {
             background-color: #f8f9fa;
@@ -68,6 +83,9 @@
     </style>
 </head>
 <body>
+    <div class="site-title">
+        <h1>LibraVerse</h1>
+    </div>
     <h1>Детали заказа #{{ order.order_id }}</h1>
 
     <div class="order-container">

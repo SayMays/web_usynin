@@ -4,12 +4,27 @@
     <meta charset="UTF-8">
     <title>Регистрация</title>
     <style>
+        .site-title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            margin: 0;
+            padding: 0;
+        }
+        .site-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+            text-decoration: none;
+        }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
         }
         h1 {
             text-align: center;
+            margin-top: 60px;
         }
         form {
             background-color: #f4f4f4;
@@ -179,6 +194,9 @@
     });
 </script>
 <body>
+    <div class="site-title">
+        <h1>LibraVerse</h1>
+    </div>
     <h1>Регистрация</h1>
     <form method="post">
         {% csrf_token %}

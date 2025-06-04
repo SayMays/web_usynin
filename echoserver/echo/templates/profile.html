@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <title>Мой профиль</title>
     <style>
+        .site-title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            margin: 0;
+            padding: 0;
+        }
+        .site-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+            text-decoration: none;
+        }
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -14,6 +28,7 @@
             text-align: center;
             color: #343a40;
             margin-bottom: 30px;
+            margin-top: 60px;
         }
         .profile-form {
             background-color: #f8f9fa;
@@ -116,6 +131,9 @@
     </style>
 </head>
 <body>
+    <div class="site-title">
+        <h1>LibraVerse</h1>
+    </div>
     <h1>Мой профиль</h1>
 
     {% if messages %}
