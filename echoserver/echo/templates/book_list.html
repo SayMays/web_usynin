@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Каталог книг</title>
+    <title>Книжный интернет-магазин</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,9 +33,13 @@
             border-radius: 5px;
         }
         .edit-button {
+            margin: 5px;
+            padding: 10px 15px;
             background-color: darkblue;
         }
         .delete-button {
+            margin: 5px;
+            padding: 10px 15px;
             background-color: red;
         }
         .auth-button {
@@ -94,6 +98,30 @@
         .filter-button:hover {
             background-color: #0056b3;
         }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .search-box {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            width: 300px;
+            max-width: 100%;
+        }
+        .search-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .search-button:hover {
+            background-color: #0056b3;
+        }
         h1 {
             text-align: center;
         }
@@ -103,12 +131,81 @@
         }
         li {
             background-color: #f4f4f4;
-            padding: 10px;
-            margin: 10px auto;
+            padding: 15px;
+            margin: 15px auto;
             width: 50%;
             border-radius: 5px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             text-align: left;
+            transition: all 0.3s ease;
+        }
+        li.out-of-stock {
+            opacity: 0.6;
+            background-color: #e9e9e9;
+        }
+        .book-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .add-to-cart-btn {
+            background-color: forestgreen;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .add-to-cart-btn:hover {
+            background-color: darkgreen;
+        }
+        .add-to-cart-btn.added {
+            background-color: #218838;
+        }
+        .add-to-cart-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .cart-counter {
+            margin-left: 8px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+        .go-to-cart-container {
+            text-align: left; /* Изменяем выравнивание на левое */
+            margin: 10px 0 0 0;
+            padding: 0;
+        }
+
+        .go-to-cart-btn {
+            display: none;
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 0;
+        }
+        .go-to-cart-btn:hover {
+            background-color: #5a6268;
+        }
+        .go-to-cart-btn.show {
+            display: inline-block;
         }
         .pagination {
             margin: 20px 0;
@@ -146,7 +243,6 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        /* Стили для модального окна фильтров */
         .filter-modal {
             display: none;
             position: fixed;
@@ -180,7 +276,8 @@
             margin-bottom: 5px;
         }
         .filter-modal-content input[type="text"],
-        .filter-modal-content input[type="number"] {
+        .filter-modal-content input[type="number"],
+        .filter-modal-content input[type="checkbox"] {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
@@ -214,6 +311,19 @@
         }
         .filter-modal-content .cancel-button:hover {
             background-color: #5a6268;
+        }
+        .in-stock-filter {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .in-stock-filter input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .in-stock-filter label {
+            margin: 0;
+            font-weight: normal;
         }
         .applied-filters {
             margin: 20px auto;
@@ -250,17 +360,54 @@
         .applied-filters .reset-button:hover {
             background-color: darkred;
         }
+        .sort-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .sort-btn {
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sort-btn:hover {
+            background-color: #5a6268;
+        }
+        .sort-btn.active {
+            background-color: #007bff;
+        }
     </style>
 </head>
 <body>
     <div class="top-right-buttons">
         {% if is_authenticated %}
             <a href="{% url 'profile' %}" class="action-button profile-button">Профиль</a>
-            <a href="{% url 'view_cart' %}" class="action-button cart-button">Корзина</a>
+            <a href="{% url 'view_cart' %}" class="action-button cart-button" id="header-cart-btn">Корзина</a>
         {% endif %}
     </div>
 
     <h1>Каталог книг</h1>
+
+    <div class="search-container">
+        <input type="text" class="search-box" id="searchInput" placeholder="Поиск по названию или автору..." value="{{ request.GET.search|default:'' }}">
+        <button class="search-button" onclick="performSearch()">Поиск</button>
+    </div>
+
+    <div class="sort-options">
+        <button class="sort-btn {% if request.GET.sort == 'name_asc' %}active{% endif %}"
+                onclick="setSort('name_asc')">А-Я</button>
+        <button class="sort-btn {% if request.GET.sort == 'name_desc' %}active{% endif %}"
+                onclick="setSort('name_desc')">Я-А</button>
+        <button class="sort-btn {% if request.GET.sort == 'price_asc' %}active{% endif %}"
+                onclick="setSort('price_asc')">Цена ↑</button>
+        <button class="sort-btn {% if request.GET.sort == 'price_desc' %}active{% endif %}"
+                onclick="setSort('price_desc')">Цена ↓</button>
+    </div>
 
     <div>
         {% if is_authenticated %}
@@ -269,10 +416,10 @@
             <a href="{% url 'login' %}" class="action-button auth-button login-button">Войти</a>
             <a href="{% url 'register' %}" class="action-button auth-button register-button">Регистрация</a>
         {% endif %}
-        {% if is_authenticated %}
-            <a href="{% url 'add_book' %}" class="action-button add-button">Добавить новую книгу</a>
+        {% if is_admin %}
+            <a href="{% url 'add_book' %}" class="action-button add-button">Добавить книгу</a>
         {% endif %}
-        <a href="#" class="action-button filter-button" onclick="openFilterModal()">Фильтр</a>
+        <a href="#" class="action-button filter-button" onclick="openFilterModal()">Фильтры</a>
     </div>
 
     <div class="filter-modal" id="filterModal">
@@ -295,6 +442,12 @@
                     <label for="price_max">Цена до:</label>
                     <input type="number" id="price_max" name="price_max" value="{{ request.GET.price_max|default:'' }}" min="0" step="0.01">
                 </div>
+                <div class="in-stock-filter">
+                    <input type="checkbox" id="in_stock" name="in_stock" {% if request.GET.in_stock %}checked{% endif %}>
+                    <label for="in_stock">Только в наличии</label>
+                </div>
+                <input type="hidden" name="search" id="searchValue" value="{{ request.GET.search|default:'' }}">
+                <input type="hidden" name="sort" id="sortValue" value="{{ request.GET.sort|default:'' }}">
                 <div class="button-group">
                     <button type="submit" class="apply-button">Применить</button>
                     <button type="button" class="cancel-button" onclick="closeFilterModal()">Отмена</button>
@@ -311,99 +464,270 @@
         {% endfor %}
     {% endif %}
 
-    {% if request.GET.book_name or request.GET.author or request.GET.price_min or request.GET.price_max %}
-        <div class="applied-filters">
-            <p><strong>Примененные фильтры:</strong></p>
-            <ul>
-                {% if request.GET.book_name and request.GET.book_name|length > 0 %}
-                    <li><strong>Название:</strong> {{ request.GET.book_name }}</li>
-                {% endif %}
-                {% if request.GET.author and request.GET.author|length > 0 %}
-                    <li><strong>Автор:</strong> {{ request.GET.author }}</li>
-                {% endif %}
-                {% if request.GET.price_min and request.GET.price_min|length > 0 %}
-                    <li><strong>Цена от:</strong> {{ request.GET.price_min }}₽</li>
-                {% endif %}
-                {% if request.GET.price_max and request.GET.price_max|length > 0 %}
-                    <li><strong>Цена до:</strong> {{ request.GET.price_max }}₽</li>
-                {% endif %}
-            </ul>
-            <button class="reset-button" onclick="window.location.href='{% url 'book_list' %}'">Сбросить фильтры</button>
-        </div>
+    {% if request.GET.book_name or request.GET.author or request.GET.price_min or request.GET.price_max or request.GET.in_stock or request.GET.search or request.GET.sort %}
+    <div class="applied-filters">
+        <p><strong>Примененные фильтры:</strong></p>
+        <ul>
+            {% if request.GET.search %}
+                <li><strong>Поиск:</strong> {{ request.GET.search }}</li>
+            {% endif %}
+            {% if request.GET.book_name %}
+                <li><strong>Название:</strong> {{ request.GET.book_name }}</li>
+            {% endif %}
+            {% if request.GET.author %}
+                <li><strong>Автор:</strong> {{ request.GET.author }}</li>
+            {% endif %}
+            {% if request.GET.price_min %}
+                <li><strong>Цена от:</strong> {{ request.GET.price_min }}₽</li>
+            {% endif %}
+            {% if request.GET.price_max %}
+                <li><strong>Цена до:</strong> {{ request.GET.price_max }}₽</li>
+            {% endif %}
+            {% if request.GET.in_stock %}
+                <li><strong>Только в наличии</strong></li>
+            {% endif %}
+            {% if request.GET.sort == 'name_asc' %}
+                <li><strong>Сортировка:</strong> А-Я</li>
+            {% elif request.GET.sort == 'name_desc' %}
+                <li><strong>Сортировка:</strong> Я-А</li>
+            {% elif request.GET.sort == 'price_asc' %}
+                <li><strong>Сортировка:</strong> Цена по возрастанию</li>
+            {% elif request.GET.sort == 'price_desc' %}
+                <li><strong>Сортировка:</strong> Цена по убыванию</li>
+            {% endif %}
+        </ul>
+        <button class="reset-button" onclick="window.location.href='{% url 'book_list' %}'">Сбросить фильтры</button>
+    </div>
     {% endif %}
 
     <ul>
         {% for book in page_obj %}
-            <li>
-                <strong>Название:</strong> {{ book.book_name }} <br>
-                <strong>Автор:</strong> {{ book.author|default:"Неизвестен" }} <br>
-                <strong>Цена:</strong> {{ book.book_price }}₽ <br>
-                {% if is_authenticated %}
-                    <a href="{% url 'add_to_cart' book.book_id %}" class="action-button" style="background-color: forestgreen;">Положить в корзину</a>
-                {% endif %}
-                {% if is_admin %}
-                    <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a>
-                    <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
-                {% endif %}
+            <li {% if book.book_count <= 0 %}class="out-of-stock"{% endif %}>
+                <strong>Название:</strong> {{ book.book_name }}<br>
+                <strong>Автор:</strong> {{ book.author|default:"Неизвестен" }}<br>
+                <strong>Цена:</strong> {{ book.book_price }}₽<br>
+                <strong>В наличии:</strong> <span id="book-count-{{ book.book_id }}">{{ book.book_count }}</span> шт.<br>
+
+                <div class="book-actions">
+                    {% if is_authenticated %}
+                        <a href="{% url 'add_to_cart' book.book_id %}"
+                           class="add-to-cart-btn"
+                           id="add-btn-{{ book.book_id }}"
+                           data-book-id="{{ book.book_id }}"
+                           {% if book.book_count <= 0 %}disabled{% endif %}>
+                           Положить в корзину
+                           <span class="cart-counter" id="counter-{{ book.book_id }}">0</span>
+                        </a>
+                    {% endif %}
+                    {% if is_admin %}
+                        <a href="{% url 'edit_book' book.book_id %}" class="action-button edit-button">Редактировать</a>
+                        <a href="{% url 'delete_book' book.book_id %}" class="action-button delete-button">Удалить</a>
+                    {% endif %}
+                </div>
+
+                <div class="go-to-cart-container">
+                    <a href="{% url 'view_cart' %}"
+                       class="go-to-cart-btn"
+                       id="go-to-cart-{{ book.book_id }}">
+                       Перейти в корзину
+                    </a>
+                </div>
             </li>
         {% empty %}
-            <li>Книг, соответствующих критериям, не найдено</li>
+            <li>Книг не найдено</li>
         {% endfor %}
     </ul>
 
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?page=1{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Первая</a>
-            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Назад</a>
+            <a href="?page=1{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}{% if request.GET.in_stock %}&in_stock=on{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}{% if request.GET.in_stock %}&in_stock=on{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Назад</a>
         {% endif %}
         <span class="current-page">
             Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
         </span>
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Вперёд</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}">Последняя</a>
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}{% if request.GET.in_stock %}&in_stock=on{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Вперёд</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.book_name %}&book_name={{ request.GET.book_name }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.price_min %}&price_min={{ request.GET.price_min }}{% endif %}{% if request.GET.price_max %}&price_max={{ request.GET.price_max }}{% endif %}{% if request.GET.in_stock %}&in_stock=on{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Последняя</a>
         {% endif %}
     </div>
 
     <script>
-        function openFilterModal() {
-            console.log('Opening filter modal');
-            document.getElementById('filterModal').style.display = 'flex';
-        }
+        const cartManager = {
+            items: {},
+            totalItems: 0,
 
-        function closeFilterModal() {
-            console.log('Closing filter modal');
-            const modal = document.getElementById('filterModal');
-            if (modal) {
-                modal.style.display = 'none';
+            initBook: function(bookId, initialCount, inCart = 0) {
+                this.items[bookId] = {
+                    available: initialCount,
+                    inCart: inCart
+                };
+            },
+
+            canAdd: function(bookId) {
+                return this.items[bookId] && this.items[bookId].available > 0;
+            },
+
+            addToCart: function(bookId) {
+                if (!this.canAdd(bookId)) return false;
+
+                this.items[bookId].available -= 1;
+                this.items[bookId].inCart += 1;
+                this.totalItems += 1;
+                return true;
+            },
+
+            removeFromCart: function(bookId, quantity = 1) {
+                if (!this.items[bookId] || this.items[bookId].inCart < quantity) return false;
+
+                this.items[bookId].available += quantity;
+                this.items[bookId].inCart -= quantity;
+                this.totalItems -= quantity;
+                return true;
+            },
+
+            checkout: function(bookId) {
+                if (!this.items[bookId]) return false;
+
+                this.totalItems -= this.items[bookId].inCart;
+                this.items[bookId].inCart = 0;
+                return true;
+            },
+
+            updateHeaderCounter: function() {
+                const cartBtn = document.getElementById('header-cart-btn');
+                if (cartBtn) {
+                    cartBtn.textContent = `Корзина${this.totalItems > 0 ? ` (${this.totalItems})` : ''}`;
+                }
+            },
+
+            updateBookDisplay: function(bookId) {
+                const item = this.items[bookId];
+                if (!item) return;
+
+                const countElement = document.getElementById(`book-count-${bookId}`);
+                const counter = document.getElementById(`counter-${bookId}`);
+                const addButton = document.getElementById(`add-btn-${bookId}`);
+                const goToCartBtn = document.getElementById(`go-to-cart-${bookId}`);
+
+                if (countElement) countElement.textContent = item.available;
+                if (counter) counter.textContent = item.inCart;
+                if (addButton) {
+                    addButton.disabled = item.available <= 0;
+                    addButton.classList.toggle('added', item.inCart > 0);
+                }
+                if (goToCartBtn) {
+                    goToCartBtn.classList.toggle('show', item.inCart > 0);
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                const bookId = btn.dataset.bookId;
+                const initialCount = parseInt(document.getElementById(`book-count-${bookId}`).textContent);
+                fetch(`/cart/get_cart_item_count/${bookId}/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    cartManager.initBook(bookId, initialCount, data.in_cart || 0);
+                    cartManager.updateBookDisplay(bookId);
+                    cartManager.updateHeaderCounter();
+                })
+                .catch(error => {
+                    console.error('Error fetching cart item count:', error);
+                    cartManager.initBook(bookId, initialCount, 0);
+                    cartManager.updateBookDisplay(bookId);
+                });
+            });
+        });
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (this.disabled) {
+                    alert('Этой книги нет в наличии');
+                    return;
+                }
+
+                const bookId = this.dataset.bookId;
+
+                if (!cartManager.canAdd(bookId)) {
+                    alert('Нельзя добавить больше книг, чем есть в наличии');
+                    return;
+                }
+
+                cartManager.addToCart(bookId);
+                cartManager.updateBookDisplay(bookId);
+                cartManager.updateHeaderCounter();
+
+                try {
+                    const response = await fetch(this.href, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status !== 'success') {
+                        cartManager.removeFromCart(bookId);
+                        cartManager.updateBookDisplay(bookId);
+                        cartManager.updateHeaderCounter();
+                        alert(data.message || 'Ошибка при добавлении в корзину');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    cartManager.removeFromCart(bookId);
+                    cartManager.updateBookDisplay(bookId);
+                    cartManager.updateHeaderCounter();
+                    alert('Произошла ошибка при добавлении в корзину');
+                }
+            });
+        });
+
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const url = new URL(window.location.href);
+
+            if (searchInput.value.trim()) {
+                url.searchParams.set('search', searchInput.value.trim());
             } else {
-                console.error('Filter modal element not found');
+                url.searchParams.delete('search');
             }
+
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
         }
 
-        document.querySelector('#filterForm').addEventListener('submit', function(event) {
-            const priceMin = document.getElementById('price_min').value;
-            const priceMax = document.getElementById('price_max').value;
+        function setSort(sortValue) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', sortValue);
+            window.location.href = url.toString();
+        }
 
-            if (priceMin && priceMin < 0) {
-                alert('Минимальная цена не может быть отрицательной');
-                event.preventDefault();
-            }
-            if (priceMax && priceMax < 0) {
-                alert('Максимальная цена не может быть отрицательной');
-                event.preventDefault();
-            }
-            if (priceMin && priceMax && parseFloat(priceMin) > parseFloat(priceMax)) {
-                alert('Минимальная цена не может быть больше максимальной');
-                event.preventDefault();
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
             }
         });
 
-        document.getElementById('filterModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                console.log('Clicked outside modal, closing');
-                closeFilterModal();
-            }
+        function openFilterModal() {
+            document.getElementById('filterModal').style.display = 'flex';
+            document.getElementById('searchValue').value = document.getElementById('searchInput').value;
+            document.getElementById('sortValue').value = '{{ request.GET.sort|default:"" }}';
+        }
+
+        function closeFilterModal() {
+            document.getElementById('filterModal').style.display = 'none';
+        }
+
+        document.getElementById('filterModal').addEventListener('click', function(e) {
+            if (e.target === this) closeFilterModal();
         });
     </script>
 </body>

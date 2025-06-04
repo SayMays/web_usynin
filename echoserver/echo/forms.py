@@ -8,11 +8,15 @@ from django.core.exceptions import ValidationError
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['book_name', 'author', 'book_price']
+        fields = ['book_name', 'author', 'book_price', 'book_count']
         labels = {
             'book_name': 'Название',
             'author': 'Автор',
-            'book_price': 'Цена (в руб.)'
+            'book_price': 'Цена (в руб.)',
+            'book_count': 'Количество в наличии'
+        }
+        widgets = {
+            'book_count': forms.NumberInput(attrs={'min': 1, 'value': 1})
         }
 
 class CustomUserCreationForm(UserCreationForm):
